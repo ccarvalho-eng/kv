@@ -1,7 +1,7 @@
-defmodule KvServer.CommandTest do
+defmodule KVServer.CommandTest do
   use ExUnit.Case
 
-  alias KvServer.Command
+  alias KVServer.Command
 
   @valid_commands [
     "CREATE shopping",
