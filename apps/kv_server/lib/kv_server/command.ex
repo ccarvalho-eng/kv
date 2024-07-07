@@ -16,8 +16,13 @@ defmodule KVServer.Command do
 
   @spec run(tuple()) :: {:ok, term()} | {:error, term()}
   def run({:create, bucket}) do
-    Registry.create(Registry, bucket)
-    {:ok, "OK\r\n"}
+    case KV.Router.route(bucket, Registry, :create, [Registry, bucket]) do
+      pid when is_pid(pid) ->
+        {:ok, "OK\r\n"}
+
+      _ ->
+        {:error, "FAILED TO CREATE BUCKET"}
+    end
   end
 
   def run({:get, bucket, key}) do
@@ -42,12 +47,20 @@ defmodule KVServer.Command do
   end
 
   defp lookup(bucket, callback_fn) do
-    case Registry.lookup(Registry, bucket) do
+    case KV.Router.route(bucket, Registry, :lookup, [Registry, bucket]) do
       {:ok, pid} ->
         callback_fn.(pid)
 
       :error ->
         {:error, :not_found}
     end
+
+    # case Registry.lookup(Registry, bucket) do
+    #   {:ok, pid} ->
+    #     callback_fn.(pid)
+
+    #   :error ->
+    #     {:error, :not_found}
+    # end
   end
 end
